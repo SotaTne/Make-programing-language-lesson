@@ -1,0 +1,13 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "[python]": {
+    "diffEditor.ignoreTrimWhitespace": false,
+    "gitlens.codeLens.symbolScopes": ["!Module"],
+    "editor.formatOnType": true,
+    "editor.wordBasedSuggestions": "matchingDocuments",
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "editor.tabSize": 4,
+  "window.zoomLevel": 0
+}
