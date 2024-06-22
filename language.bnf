@@ -1,19 +1,27 @@
-<Program> ::= <Stmt>+
+<program> ::= <stmt> <program> | <stmt>
 
-<Stmt> ::= <Val> | "Print" <Expr> "\n"
+<stmt> ::= <printStmt> | <exprStmt>
 
-<Val> ::= <Identify> "=" <Expr>
+<printStmt> ::= "print" <assign> "\n"
 
-<Expr> ::= <Term> (("+" | "-") <Term>)*
+<exprStmt> ::= <assign> "\n"
 
-<Term> ::= <Factor> (("*" | "/") <Factor>)*
+<assign> ::= <identify> "=" <assign> | <expr>
 
-<Factor> ::= <Primary> | <Identify>
+<expr> ::= <term> (("+" | "-") <expr>) | <term>
 
-<Identify> ::= [a-zA-Z_][a-zA-Z0-9_]*
+<term> ::= <factor> (("*" | "/") <term>) | <factor>
 
-<Primary> ::= <Number>
+<factor> ::= <digit> | <identify>
 
-<Number> ::= [1-9][0-9]*
+<number> ::= "0" | ("1" | ... | "9") <digits>
 
-<Whitespace> ::= [ \t\n\r]*
+<digits> ::= <digit> | <digit> <digits>
+
+<identify> ::= <alphabet> <alphabets>
+
+<alphabets> ::= <alphabet> <alphabets> | <digit> <alphabets> | ε
+
+<alphabet> ::= "_" | ("a" | ... | "z") | ("A" | ... | "Z")
+
+<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
