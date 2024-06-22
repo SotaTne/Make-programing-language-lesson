@@ -62,3 +62,16 @@ def Print(value):
 def callErr(error):
     print(error)
     exit()
+
+
+[
+    {"type": "IDENTIFY", "val": "print"},
+    {"type": "IDENTIFY", "val": "a"},
+    {"type": "EQUAL", "val": ""},
+    {"type": "NUMBER", "val": "3"},
+    {"type": "STAR", "val": ""},
+    {"type": "NUMBER", "val": "1"},
+    {"type": "ADD", "val": ""},
+    {"type": "NUMBER", "val": "2"},
+    {"type": "NEWLINE", "val": ""},
+]
