@@ -4,15 +4,15 @@
 
 <printStmt> ::= "print" <assign> "\n"
 
-<exprStmt> ::= <assign> "\n"
+<exprStmt> ::= <expr> "\n"
 
-<assign> ::= <identify> "=" <assign> | <expr>
+<expr> ::= <arith_expr> "=" <expr> | <arith_expr>
 
-<expr> ::= <term> (("+" | "-") <expr>) | <term>
+<arith_expr> ::= <term> (("+" | "-") <arith_expr>) | <term>
 
-<term> ::= <factor> (("*" | "/") <term>) | <factor>
+<term> ::= <primary> (("*" | "/") <term>) | <primary>
 
-<factor> ::= <digit> | <identify>
+<primary> ::= <digit> | <identify>
 
 <number> ::= "0" | ("1" | ... | "9") <digits>
 

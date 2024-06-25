@@ -101,3 +101,20 @@ def parser(tokens):
 
     stmt(0)  # トークンリストの先頭から解析を開始
     return parsed
+
+
+print(
+    parser(
+        [
+            {"type": "IDENTIFY", "val": "print"},
+            {"type": "IDENTIFY", "val": "a"},
+            {"type": "EQUAL", "val": ""},
+            {"type": "NUMBER", "val": "3"},
+            {"type": "STAR", "val": ""},
+            {"type": "NUMBER", "val": "1"},
+            {"type": "ADD", "val": ""},
+            {"type": "NUMBER", "val": "2"},
+            {"type": "NEWLINE", "val": ""},
+        ]
+    )
+)
