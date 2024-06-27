@@ -1,67 +1,76 @@
-from Parser import parseTypes
-from Lexer import typesMap
-
 valMap = {}
+
+
+[
+    {
+        "op": "",
+        "val": {
+            "op": "ASSIGNMENT",
+            "left": {"op": "IDENTIFY", "val": "z"},
+            "right": {"op": "NUMBER", "val": "100"},
+        },
+    },
+    {
+        "op": "PRINT",
+        "val": {
+            "op": "ADD",
+            "left": {"op": "IDENTIFY", "val": "z"},
+            "right": {"op": "NUMBER", "val": "1"},
+        },
+    },
+]
 
 
 def Interpreter(parsed):
     for stmt in parsed:
-        process_stmt(stmt)
+        runStmt(stmt)
 
 
-def expr(node):
-    if isinstance(node, dict):
-        left = term(node["left"])
-        right = expr(node["right"])
-
-        if node["op"] == typesMap["+"]:
-            return float(left) + float(right)
-        elif node["op"] == typesMap["-"]:
-            return float(left) - float(right)
-        else:
-            return term(node)
-    return factor(node)
-
-
-def term(node):
-    if isinstance(node, dict) and node["type"] == parseTypes["expr"]:
-        left = factor(node["left"])
-        right = expr(node["right"])
-
-        if node["op"] == typesMap["*"]:
-            return left * right
-        elif node["op"] == typesMap["/"]:
-            return left / right
-    return factor(node)
-
-
-def factor(node):
-    if isinstance(node, str):
-        if node.isalpha():
-            return float(valMap[node])
-        elif node.isdigit():
-            return int(node)
-    print(node)
-    callErr("has no factor")
-
-
-def process_stmt(node):
-    if node["type"] == parseTypes["assignment"]:
-        valMap[node["name"]] = expr(node["val"])
-    elif node["type"] == parseTypes["print"]:
-        Print(expr(node["val"]))
+def runStmt(stmt):
+    if stmt["op"] == "PRINT":
+        expr = runExpr(stmt["val"])
+        exprPrint()
     else:
-        print(node)
-        callErr("InterpretError")
+        runExpr(expr)
 
 
-def Print(value):
-    print(value)
+def runExpr(expr):
+    if expr["op"] == "ASSIGNMENT":
+        left = runExpr(expr["left"])
+        right = runExpr(expr["right"])
+        Assign(left, right)
+        return right
+    elif expr["op"] == "ADD":
+        return float(runExpr(expr["left"])) + float(runExpr(expr["right"]))
+    elif expr["op"] == "MINUS":
+        return float(runExpr(expr["left"])) - float(runExpr(expr["right"]))
+    elif expr["op"] == "STAR":
+        return float(runExpr(expr["left"])) * float(runExpr(expr["right"]))
+    elif expr["op"] == "SLASH":
+        return float(runExpr(expr["left"])) / float(runExpr(expr["right"]))
+
+    runArithExpr(expr)
 
 
-def callErr(error):
-    print(error)
-    exit()
+def runArithExpr(expr):
+    print()
+
+
+def Assign(left, right):
+    if left:
+        valMap[str(left)] = right
+
+
+def runTerm():
+    print()
+
+
+def runPrimary():
+    print()
+
+
+def exprPrint(expr):
+    print(expr["val"])
 
 
 [

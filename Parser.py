@@ -20,10 +20,10 @@ def parser(tokens):
                 # "print" 文の引数を解析
                 current, val = expr(current)
                 # 解析結果を文としてパース済リストに追加
-                parsed.append({"type": "STMT", "op": "PRINT", "val": val})
+                parsed.append({"op": "PRINT", "val": val})
             else:
                 # その他の文の場合
-                parsed.append({"type": "STMT", "op": "", "val": left})
+                parsed.append({"op": "", "val": left})
 
             # 改行トークンのチェック、または最後のトークンでない場合
             if (current < len(tokens) and tokens[current]["type"] == "NEWLINE") or (
@@ -48,7 +48,6 @@ def parser(tokens):
             # 右辺の式を再帰的に解析
             current, right = expr(current)
             return current, {
-                "type": "EXPR",
                 "op": "ASSIGNMENT",
                 "left": val,
                 "right": right,
@@ -66,7 +65,7 @@ def parser(tokens):
             current += 1
             # 右辺の項を再帰的に解析
             current, right = term(current)
-            val = {"type": "EXPR", "op": Type, "left": val, "right": right}
+            val = {"op": Type, "left": val, "right": right}
         return current, val
 
     def term(current):
@@ -80,7 +79,7 @@ def parser(tokens):
             current += 1
             # 右辺のプライマリを再帰的に解析
             current, right = primary(current)
-            val = {"type": "EXPR", "op": Type, "left": val, "right": right}
+            val = {"op": Type, "left": val, "right": right}
         return current, val
 
     def primary(current):
@@ -88,12 +87,12 @@ def parser(tokens):
         if current < len(tokens) and tokens[current]["type"] == "IDENTIFY":
             val = tokens[current]["val"]
             current += 1
-            return current, {"type": "EXPR", "op": "IDENTIFY", "val": val}
+            return current, {"op": "IDENTIFY", "val": val}
         # 数値トークンのチェック
         elif current < len(tokens) and tokens[current]["type"] == "NUMBER":
             val = tokens[current]["val"]
             current += 1
-            return current, {"type": "EXPR", "op": "NUMBER", "val": val}
+            return current, {"op": "NUMBER", "val": val}
         else:
             if current < len(tokens):
                 print(tokens[current]["type"])

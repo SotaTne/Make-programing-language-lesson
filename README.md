@@ -56,7 +56,7 @@
 
 ## 字句解析について
 
-字句解析は**Lexer**とも呼ばれる字句解析機を使って行います。
+字句解析は**Lexer**とも呼ばれる**字句解析機**を使って行います。
 まず、Lexerで何をしてほしいかを少し整理してみましょう。
 
 ### やりたいこと
@@ -70,23 +70,23 @@
 ```python
 [
     {
-        "type":"NUMBER"
+        "type":"NUMBER",
         "val":"1"
     },
     {
-        "type":"ADD"
+        "type":"ADD",
         "val":""
     },
     {
-        "type":"NUMBER"
+        "type":"NUMBER",
         "val":"2"
     },
     {
-        "type":"STAR"
+        "type":"STAR",
         "val":""
     },
     {
-        "type":"NUMBER"
+        "type":"NUMBER",
         "val":"3"
     },
 ]
@@ -200,7 +200,9 @@ def lexer(input_str):
     return tokens
 
 ```
+
 ここまででどのように**Lexer**が動き、どうやって作ればいいかがわかったと思います。
+これで**Lexer**についての説明は終了です。
 
 ## 構文解析
 
@@ -213,23 +215,23 @@ def lexer(input_str):
 ```python
 [
     {
-        "type":"NUMBER"
+        "type":"NUMBER",
         "val":"1"
     },
     {
-        "type":"ADD"
+        "type":"ADD",
         "val":""
     },
     {
-        "type":"NUMBER"
+        "type":"NUMBER",
         "val":"2"
     },
     {
-        "type":"STAR"
+        "type":"STAR",
         "val":""
     },
     {
-        "type":"NUMBER"
+        "type":"NUMBER",
         "val":"3"
     },
 ]
@@ -280,6 +282,7 @@ Lexerよりも出力する量は配列の数は減っていますが、正直一
 これは、この言語はこの4つの要素からのみでできているという意味です。
 
 ここで、
+
 * $V_n$ は非終端記号の集合
 * $V_t$ は終端記号の集合
 * $R$ は生成規則の集合
@@ -345,7 +348,7 @@ a = 100*2+3
 <exprStmt> ::= <expr> "\n"
 <expr> ::= <arith_expr> "=" <expr> | <arith_expr>
 <arith_expr> ::= <term> (("+" | "-") <arith_expr>) | <term>
-<term> ::= <factor> (("*" | "/") <term>) | <primary>
+<term> ::= <primary> (("*" | "/") <term>) | <primary>
 <primary> ::= <digit> | <identify>
 <number> ::= "0" | ("1" | ... | "9") <digits>
 <digits> ::= <digit> | <digit> <digits>
@@ -384,7 +387,7 @@ a = 100*2+3
 
 ```python
 a = 10+2*4
-print a
+print a \n
 ```
 
 #### Stmt(文)の処理方法
@@ -400,7 +403,7 @@ BNFを読むとわかる通り、**printStmt**は、右側に、`"print"`左側�
 イメージしずらいかもなので、例を挙げると
 
 ```python
-print 1+3+4\n
+print 1+3+4 \n
 ```
 
 このようなStmt(文）を読むことができます。
@@ -414,7 +417,7 @@ print 1+3+4\n
 
 ```python
 a=100*2+3
-1*a\n
+1*a \n
 ```
 
 このようなStmt(文）を読むことができます。
@@ -470,7 +473,7 @@ a=100*2+3
 下に図を用意したので参考にしてください
 
 ```python
-print a = 3*1+2\n
+print a = 3*1+2 \n
 ```
 
 のような場合
@@ -515,14 +518,14 @@ print a = 3*1+2\n
 
 ```python
 {
-    "op":"ADD"
-    "left":1
+    "op":"ADD",
+    "left":1,
     "right":{
-        "op":"ADD"
-        "left":2
+        "op":"ADD",
+        "left":2,
         "right":{
-            "op":"ADD"
-            "left":3
+            "op":"ADD",
+            "left":3,
             "right":4
         }
     }
@@ -556,11 +559,11 @@ print a = 3*1+2\n
 ```python
 [
     {
-        "type":"NUMBER"
+        "type":"NUMBER",
         "val":1
-    }
+    },
     {
-        "type":"NUMBER"
+        "type":"NUMBER",
         "val":1
     }
     .
@@ -574,7 +577,138 @@ print a = 3*1+2\n
 #### 処理のまとめ
 
 気づいた方もいるかもしれませんが、**Parser**の処理で現在読んでいる配列の位置を移動させるときは、**終端記号**が来たときだけです。
-では、どのように処理をすれば良いかわかったところで、いかにPythonのサンプルコードを書きます。
+
+#### Parserのコード
+
+では、どのように処理をすれば良いかわかったところで、以下にPythonのサンプルコードを書きます。
+
+```python
+def parser(tokens):
+    parsed = []
+
+    def error(message):
+        # エラーメッセージを表示し、プログラムを終了する
+        print(message)
+        exit()
+
+    def stmt(current):
+        # トークンリストの末尾に達していない場合
+        if len(tokens) > current:
+            # 式を解析し、結果を left として取得
+            current, left = expr(current)
+            # "print" 文の場合
+            if (
+                current < len(tokens)
+                and left["op"] == "IDENTIFY"
+                and left["val"] == "print"
+            ):
+                # "print" 文の引数を解析
+                current, val = expr(current)
+                # 解析結果を文としてパース済リストに追加
+                parsed.append({"type": "STMT", "op": "PRINT", "val": val})
+            else:
+                # その他の文の場合
+                parsed.append({"type": "STMT", "op": "", "val": left})
+
+            # 改行トークンのチェック、または最後のトークンでない場合
+            if (current < len(tokens) and tokens[current]["type"] == "NEWLINE") or (
+                current == len(tokens) - 1 and tokens[current]["type"] != "NEWLINE"
+            ):
+                current += 1
+            elif current < len(tokens):
+                # 改行がないまたは、最後のトークンでない場合はエラーを報告
+                print(tokens[current]["type"])
+                error("Expected NEWLINE in stmt")
+
+            # 再帰的に次の文を解析
+            stmt(current)
+        return current
+
+    def expr(current):
+        # 算術式を解析し、結果を取得
+        current, val = arith_expr(current)
+        # 代入演算子 "=" のチェック
+        if current < len(tokens) and tokens[current]["type"] == "EQUAL":
+            current += 1
+            # 右辺の式を再帰的に解析
+            current, right = expr(current)
+            return current, {
+                "type": "EXPR",
+                "op": "ASSIGNMENT",
+                "left": val,
+                "right": right,
+            }
+        return current, val
+
+    def arith_expr(current):
+        # 項を解析し、結果を取得
+        current, val = term(current)
+        # 加算または減算演算子のチェック
+        while current < len(tokens) and (
+            tokens[current]["type"] == "ADD" or tokens[current]["type"] == "MINUS"
+        ):
+            Type = tokens[current]["type"]
+            current += 1
+            # 右辺の項を再帰的に解析
+            current, right = term(current)
+            val = {"type": "EXPR", "op": Type, "left": val, "right": right}
+        return current, val
+
+    def term(current):
+        # プライマリを解析し、結果を取得
+        current, val = primary(current)
+        # 乗算または除算演算子のチェック
+        while current < len(tokens) and (
+            tokens[current]["type"] == "STAR" or tokens[current]["type"] == "SLASH"
+        ):
+            Type = tokens[current]["type"]
+            current += 1
+            # 右辺のプライマリを再帰的に解析
+            current, right = primary(current)
+            val = {"type": "EXPR", "op": Type, "left": val, "right": right}
+        return current, val
+
+    def primary(current):
+        # 識別子トークンのチェック
+        if current < len(tokens) and tokens[current]["type"] == "IDENTIFY":
+            val = tokens[current]["val"]
+            current += 1
+            return current, {"type": "EXPR", "op": "IDENTIFY", "val": val}
+        # 数値トークンのチェック
+        elif current < len(tokens) and tokens[current]["type"] == "NUMBER":
+            val = tokens[current]["val"]
+            current += 1
+            return current, {"type": "EXPR", "op": "NUMBER", "val": val}
+        else:
+            if current < len(tokens):
+                print(tokens[current]["type"])
+            error("Expected IDENTIFY or NUMBER in primary")
+
+    stmt(0)  # トークンリストの先頭から解析を開始
+    return parsed
+```
+
+おそらくインタプリタで一番大変な**Parser**についての説明が終了しました。
+案外簡単でしたか？
+
+## 意味解析+実行
+
+ここからは**意味解析+実行**につての解説を始めようと思います。
+**Interpreter**とも呼ばれる**翻訳系**で行われます。
+これまでと同じように何をして欲しいかを整理してみましょう。と言いたいところですが、**Interpreter**ではソースコードをこれまで作ってきた**Lexer**と**Parser**に通したものを実行していくものです。
+つまり、これまでとは違い何か文字を返す関数を作るわけではありません。
+一応以下に、print関数と四則演算を用いた**Parse**に通した配列と、それによって出力されるものをまとめたものを書いておきます。
+
+```python
+
+```
+
+この**Parser**を通した配列により、以下が出力されます
+
+```python
+```
+
+このような実行結果を出力します。
 
 # 引用元
 >
